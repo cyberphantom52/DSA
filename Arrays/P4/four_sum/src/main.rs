@@ -16,29 +16,23 @@ pub fn four_sum(mut nums: Vec<i32>, target: i32) -> Vec<Vec<i32>> {
             }
             let (mut left, mut right) = (j + 1, len - 1);
             while left < right {
-                match (nums[i] as i64 + nums[j] as i64 + nums[left] as i64 + nums[right] as i64).cmp(&(target as i64)) {
-                    Ordering::Greater => {
-                        while left < right && nums[right] == nums[right - 1] {
-                            right -= 1;
-                        }
-                        right -= 1;
-                    }
-                    Ordering::Less => {
-                        while left < right && nums[left] == nums[left + 1] {
-                            left += 1;
-                        }
-                        left += 1;
-                    }
+                // use saturating_add to avoid overflow
+                match nums[i]
+                    .saturating_add(nums[j])
+                    .saturating_add(nums[left])
+                    .saturating_add(nums[right])
+                    .cmp(&target)
+                {
+                    Ordering::Greater => right -= 1,
+                    Ordering::Less => left += 1,
                     Ordering::Equal => {
                         result.push(vec![nums[i], nums[j], nums[left], nums[right]]);
-                        while left < right && nums[right] == nums[right - 1] {
-                            right -= 1;
-                        }
+
                         right -= 1;
-                        while left < right && nums[left] == nums[left + 1] {
-                            left += 1;
-                        }
                         left += 1;
+
+                        while left < right && nums[left] == nums[left - 1] { left += 1 }
+                        while left < right && nums[right] == nums[right + 1] { right -= 1 }
                     }
                 }
             }
@@ -48,7 +42,7 @@ pub fn four_sum(mut nums: Vec<i32>, target: i32) -> Vec<Vec<i32>> {
 }
 
 fn main() {
-    let mut nums = vec![1000000000,1000000000,1000000000,1000000000];
+    let mut nums = vec![1000000000, 1000000000, 1000000000, 1000000000];
     let mut target = -294967296;
     println!("{:?}", four_sum(nums, target));
     nums = vec![1, 0, -1, 0, -2, 2];
